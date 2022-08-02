@@ -45,8 +45,8 @@ function App() {
   const [selection, setSelection] = useState(0);
   function confirmQuery() {
     if (is_leaf) {
-      window.open(root_obj.replace(/(?<!%)%s/, query));
-    } else {
+      window.open(root_obj.replace(/(?<!%)%s/, encodeURIComponent(query)));
+    } else if (selection < options.length) {
       setPath(path.concat(options[selection]));
       setQuery('');
       setSelection(0);
