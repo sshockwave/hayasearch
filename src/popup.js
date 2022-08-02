@@ -41,16 +41,44 @@ function App() {
     }
   }
   const is_leaf = typeof root_obj === 'string';
-  const options = matchSorter(Array.from(Object.keys(root_obj)), query);
+  const options = is_leaf ? [] : matchSorter(Array.from(Object.keys(root_obj)), query);
   const [selection, setSelection] = useState(0);
+  function confirmQuery() {
+    if (is_leaf) {
+      window.open(root_obj.replace(/(?<!%)%s/, query));
+    } else {
+      setPath(path.concat(options[selection]));
+      setQuery('');
+      setSelection(0);
+    }
+  }
   function handleKeyDown(ev) {
     switch (ev.key) {
       case 'Escape': {
         ev.preventDefault();
         window.close();
+        break;
       }
       case 'Enter': {
         ev.preventDefault();
+        confirmQuery();
+        break;
+      }
+      case 'Tab': {
+        ev.preventDefault();
+        if (!is_leaf) {
+          confirmQuery();
+        }
+        break;
+      }
+      case 'Backspace': {
+        if (query === '' && path.length > 0) {
+          ev.preventDefault();
+          setPath(path.slice(0, -1));
+          setQuery(path.at(-1));
+          setSelection(0);
+        }
+        break;
       }
       case 'ArrowUp': {
         ev.preventDefault();
@@ -74,9 +102,11 @@ function App() {
   }
   return <Box component='form' sx={{ minWidth: '20rem' }} >
     <TextField
-      label={path.join('&raquo;')}
+      label={path.join('»')}
       autoFocus
       fullWidth
+      color={is_leaf ? 'success': 'warning'}
+      value={query}
       size="small"
       onKeyDown={handleKeyDown}
       onInput={(ev) => setQuery(ev.target.value)}
