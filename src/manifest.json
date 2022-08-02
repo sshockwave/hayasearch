@@ -17,7 +17,7 @@
   "commands": {
     "_execute_action": {
       "suggested_key": {
-        "default": "Alt+S"
+        "default": "Alt+Q"
       },
       "description": "Open the pop up window"
     }
