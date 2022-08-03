@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { matchSorter } from 'match-sorter'
 import {
   Box,
@@ -22,34 +22,45 @@ function getFavicon(url) {
   return url.toString();
 }
 
-function App() {
-  const [config, setConfig] = useState(null);
-  if (config === null) {
-    chrome.storage.sync.get(['search_engines'], ({ search_engines }) => {
-      search_engines ||= {};
-      setConfig(search_engines);
-    });
-  }
-  const [query, setQuery] = useState('');
-  const [path, setPath] = useState([]);
-  let root_obj = config || {};
-  for (let k of path) {
+let config;
+function get_path_obj(path) {
+  let ans = config || {};
+  for (const k of path) {
     try {
-      root_obj = root_obj[k];
+      ans = ans[k];
     } catch {
-      break;
+      return ans;
     }
   }
+  return ans;
+}
+
+function App() {
+  const [query, setQuery] = useState('');
+  const [path, setPath] = useState([]);
+  const root_obj = get_path_obj(path);
   const is_leaf = typeof root_obj === 'string';
-  const options = is_leaf ? [] : matchSorter(Array.from(Object.keys(root_obj)), query);
   const [selection, setSelection] = useState(0);
+  const [options, setOptions] = useState(() => Array.from(Object.keys(config)));
+  function updateQuery(query, path) {
+    let cur_root = root_obj;
+    if (path !== undefined) {
+      setPath(path);
+      cur_root = get_path_obj(path);
+    }
+    setQuery(query);
+    setSelection(0);
+    if (typeof cur_root === 'string') { // is leaf
+      setOptions([]);
+    } else {
+      setOptions(matchSorter(Array.from(Object.keys(cur_root)), query));
+    }
+  }
   function confirmQuery() {
     if (is_leaf) {
       window.open(root_obj.replace(/(?<!%)%s/, encodeURIComponent(query)));
     } else if (selection < options.length) {
-      setPath(path.concat(options[selection]));
-      setQuery('');
-      setSelection(0);
+      updateQuery('', path.concat(options[selection]));
     }
   }
   function handleKeyDown(ev) {
@@ -74,9 +85,7 @@ function App() {
       case 'Backspace': {
         if (query === '' && path.length > 0) {
           ev.preventDefault();
-          setPath(path.slice(0, -1));
-          setQuery(path.at(-1));
-          setSelection(0);
+          updateQuery(path.at(-1), path.slice(0, -1));
         }
         break;
       }
@@ -109,7 +118,7 @@ function App() {
       value={query}
       size="small"
       onKeyDown={handleKeyDown}
-      onInput={(ev) => setQuery(ev.target.value)}
+      onInput={(ev) => updateQuery(ev.target.value)}
     />
     { is_leaf ? null : <List dense>
       {options.map((key, idx) => (
@@ -131,4 +140,11 @@ function App() {
   </Box>;
 }
 
-createRoot(document.getElementById('root')).render(<App/>);
+function start_app() {
+  createRoot(document.getElementById('root')).render(<App/>);
+}
+
+chrome.storage.sync.get(['search_engines'], ({ search_engines }) => {
+  config = search_engines || {};
+  start_app();
+});
