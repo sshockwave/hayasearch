@@ -4,10 +4,10 @@ class Suggestion {
 
 export class Google extends Suggestion {
     async fetch(url, _) {
-        if (!url.match(/(?:^|\.)google\./)) {
+        url = new URL(url);
+        if (!url.hostname.match(/(?:^|\.)google\./)) {
             return;
         }
-        url = new URL(url);
         url.pathname = '/complete/search';
         url.searchParams.set('client', 'gws-wiz');
         try {
@@ -24,7 +24,8 @@ export class Google extends Suggestion {
 
 export class Bilibili extends Suggestion {
     async fetch(url, term) {
-        if (!url.match(/(?:^|\.)bilibili\./)) {
+        url = new URL(url);
+        if (!url.hostname.match(/(?:^|\.)bilibili\./)) {
             return;
         }
         term = encodeURIComponent(term);
@@ -32,8 +33,25 @@ export class Bilibili extends Suggestion {
         try {
             const res = await fetch(url);
             let data = await res.json();
-            console.log(data);
             return data['result']['tag'].map(x=>x['value']);
+        } catch {
+            return;
+        }
+    }
+}
+
+export class Baidu extends Suggestion {
+    async fetch(url, term) {
+        url = new URL(url);
+        if (!url.hostname.match(/(?:^|\.)baidu\./)) {
+            return;
+        }
+        term = encodeURIComponent(term);
+        url = `https://www.baidu.com/sugrec?prod=pc&wd=${term}`;
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            return data['g'].map(x=>x['q']);
         } catch {
             return;
         }
@@ -43,6 +61,7 @@ export class Bilibili extends Suggestion {
 const engine_list = [
     Google,
     Bilibili,
+    Baidu,
 ];
 
 export default class Aggregated extends Suggestion {
