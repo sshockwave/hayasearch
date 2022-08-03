@@ -13,6 +13,10 @@
     "storage",
     "activeTab"
   ],
+  "host_permissions": [
+    "http://*/",
+    "https://*/"
+  ],
   "options_page": "options.html",
   "commands": {
     "_execute_action": {

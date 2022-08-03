@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import React, { useState } from 'react';
+import React, { useEffect, useState, createRef } from 'react';
 import { matchSorter } from 'match-sorter'
 import {
   Box,
@@ -11,6 +11,7 @@ import {
   ListItemButton,
   Icon,
 } from '@mui/material';
+import { Google } from './suggestions.js';
 
 function getFavicon(url) {
   try {
@@ -35,6 +36,16 @@ function get_path_obj(path) {
   return ans;
 }
 
+async function make_suggestion_query(url) {
+  let api = new Google;
+  let res = await api.fetch(url);
+  return res || [];
+}
+
+function get_query_url(url, query) {
+  return url.replace(/(?<!%)%s/, encodeURIComponent(query));
+}
+
 function App() {
   const [query, setQuery] = useState('');
   const [path, setPath] = useState([]);
@@ -42,6 +53,16 @@ function App() {
   const is_leaf = typeof root_obj === 'string';
   const [selection, setSelection] = useState(0);
   const [options, setOptions] = useState(() => Array.from(Object.keys(config)));
+  useEffect(() => { // handle search suggestion
+    if (!is_leaf) {
+      return;
+    }
+    make_suggestion_query(get_query_url(root_obj, query))
+      .then((res) => {
+        setOptions(res);
+        setSelection(res.length);
+      });
+  }, [path, query]);
   function updateQuery(query, path) {
     let cur_root = root_obj;
     if (path !== undefined) {
@@ -51,19 +72,39 @@ function App() {
     setQuery(query);
     setSelection(0);
     if (typeof cur_root === 'string') { // is leaf
-      setOptions([]);
+      if (query === '') {
+        setOptions([]);
+      }
     } else {
       setOptions(matchSorter(Array.from(Object.keys(cur_root)), query));
     }
   }
   function confirmQuery() {
     if (is_leaf) {
-      window.open(root_obj.replace(/(?<!%)%s/, encodeURIComponent(query)));
+      window.open(get_query_url(root_obj, query));
     } else if (selection < options.length) {
       updateQuery('', path.concat(options[selection]));
     }
   }
   function handleKeyDown(ev) {
+    function prev_sel() {
+      let nxt = selection - 1;
+      if (nxt < 0) {
+        if (is_leaf) {
+          nxt = options.length;
+        } else {
+          nxt = options.length - 1;
+        }
+      }
+      setSelection(nxt);
+    }
+    function next_sel() {
+      let nxt = selection + 1;
+      if ((is_leaf && nxt > options.length) || (!is_leaf && nxt >= options.length)) {
+        nxt = 0;
+      }
+      setSelection(nxt);
+    }
     switch (ev.key) {
       case 'Escape': {
         ev.preventDefault();
@@ -77,10 +118,11 @@ function App() {
       }
       case 'Tab': {
         ev.preventDefault();
-        if (!is_leaf) {
-          confirmQuery();
+        if (ev.shiftKey) {
+          prev_sel();
+        } else {
+          next_sel();
         }
-        break;
       }
       case 'Backspace': {
         if (query === '' && path.length > 0) {
@@ -91,24 +133,17 @@ function App() {
       }
       case 'ArrowUp': {
         ev.preventDefault();
-        let nxt = selection - 1;
-        if (nxt < 0) {
-          nxt = options.length - 1;
-        }
-        setSelection(nxt);
+        prev_sel();
         break;
       }
       case 'ArrowDown': {
         ev.preventDefault();
-        let nxt = selection + 1;
-        if (nxt === options.length) {
-          nxt = 0;
-        }
-        setSelection(nxt);
+        next_sel();
         break;
       }
     }
   }
+  const text_ref = createRef();
   return <Box component='form' sx={{ minWidth: '20rem' }} >
     <TextField
       label={path.join('»')}
@@ -117,26 +152,31 @@ function App() {
       color={is_leaf ? 'success': 'warning'}
       value={query}
       size="small"
+      inputRef={text_ref}
       onKeyDown={handleKeyDown}
       onInput={(ev) => updateQuery(ev.target.value)}
     />
-    { is_leaf ? null : <List dense>
+    <List dense>
       {options.map((key, idx) => (
         <ListItem key={key} disablePadding>
           <ListItemButton
             selected={selection === idx}
             onMouseOver={() => setSelection(idx)}
+            onClick={() => {
+              confirmQuery();
+              text_ref.current.focus();
+            }}
           >
-            <ListItemIcon>
+            {is_leaf ? null : <ListItemIcon>
               <Icon>
                 <img src={getFavicon(root_obj[key])} height={25} width={25}/>
               </Icon>
-            </ListItemIcon>
+            </ListItemIcon>}
             <ListItemText primary={key}/>
           </ListItemButton>
         </ListItem>
       ))}
-    </List>}
+    </List>
   </Box>;
 }
 
