@@ -6,6 +6,7 @@ import commonjs from '@rollup/plugin-commonjs'
 import replace from '@rollup/plugin-replace'
 import { emptyDir } from 'rollup-plugin-empty-dir'
 import { chromeExtension, simpleReloader } from 'rollup-plugin-chrome-extension'
+import { terser } from "rollup-plugin-terser";
 
 export default {
   input: 'src/manifest.json',
@@ -21,12 +22,15 @@ export default {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     }),
     babel({
+      babelHelpers: 'runtime',
       ignore: ['node_modules'],
       presets: ["@babel/preset-react"],
+      plugins: ["@babel/plugin-transform-runtime"],
     }),
     simpleReloader(),
     resolve(),
     commonjs(),
     emptyDir(),
+    terser(),
   ],
 }
