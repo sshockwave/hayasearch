@@ -11,7 +11,7 @@ import {
   ListItemButton,
   Icon,
 } from '@mui/material';
-import { Google } from './suggestions.js';
+import Aggregated from './suggestions.js';
 
 function getFavicon(url) {
   try {
@@ -36,12 +36,6 @@ function get_path_obj(path) {
   return ans;
 }
 
-async function make_suggestion_query(url) {
-  let api = new Google;
-  let res = await api.fetch(url);
-  return res || [];
-}
-
 function get_query_url(url, query) {
   return url.replace(/(?<!%)%s/, encodeURIComponent(query));
 }
@@ -57,7 +51,9 @@ function App() {
     if (!is_leaf) {
       return;
     }
-    make_suggestion_query(get_query_url(root_obj, query))
+    const api = new Aggregated;
+    api
+      .fetch(get_query_url(root_obj, query), query)
       .then((res) => {
         setOptions(res);
         setSelection(res.length);
@@ -72,7 +68,7 @@ function App() {
     setQuery(query);
     setSelection(0);
     if (typeof cur_root === 'string') { // is leaf
-      if (query === '') {
+      if (!is_leaf) { // if switched from non-leaf
         setOptions([]);
       }
     } else {
