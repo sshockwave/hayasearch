@@ -1,0 +1,27 @@
+on: push
+
+name: Build Chrome Extension
+
+jobs:
+  build_and_deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    - name: Install dependencies
+      run: |
+        npm install
+    - name: Build
+      run: |
+        npm run build
+    - name: Zip files
+      run: |
+        cd dist/
+        zip -r ../extension.zip .
+    - uses: actions/upload-artifact@v3
+      with:
+        name: extension-zip
+        path: ./extension.zip
