@@ -78,7 +78,7 @@ export class NPMJS extends Suggestion {
 export class MediaWiki extends Suggestion {
     async fetch(url, term) {
         url = new URL(url);
-        if (!url.hostname.match(/(?:^|\.)wikipedia\./)) {
+        if (!url.hostname.match(/(?:^|\.)(?:wikipedia|prts)\./)) {
             return;
         }
         url.pathname = (new URL('./api.php', url)).pathname;
