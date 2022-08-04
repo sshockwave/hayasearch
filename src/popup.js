@@ -1,14 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import React, { useEffect, useState, createRef } from 'react';
 import { matchSorter } from 'match-sorter'
-import {
-  TextField,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemButton,
-} from '@mui/material';
 import Aggregated from './suggestions.js';
 import './scss/styles.scss';
 
