@@ -36,10 +36,16 @@ function App() {
   const [path, setPath] = useState([]);
   const root_obj = get_path_obj(path);
   const is_leaf = typeof root_obj === 'string';
-  const [selection, setSelection] = useState(0);
+  let [selection, setSelection] = useState(0);
   const [options, setOptions] = useState(() => Array.from(Object.keys(config)));
+  function getFinalQuery() {
+    return is_leaf && selection !== -1 ? options[selection]: query;
+  }
   useEffect(() => { // handle search suggestion
     if (!is_leaf) {
+      return;
+    }
+    if (selection !== -1) {
       return;
     }
     const api = new Aggregated;
@@ -69,7 +75,7 @@ function App() {
   }
   function confirmQuery() {
     if (is_leaf) {
-      window.open(get_query_url(root_obj, query));
+      window.open(get_query_url(root_obj, getFinalQuery()));
     } else if (selection < options.length) {
       updateQuery('', path.concat(options[selection]));
     }
@@ -104,6 +110,9 @@ function App() {
         ev.preventDefault();
         if (is_leaf) {
           if (ev.shiftKey) {
+            if (query === '' && path.length > 0) {
+              updateQuery(path.at(-1), path.slice(0, -1));
+            }
             prev_sel();
           } else {
             next_sel();
@@ -111,6 +120,7 @@ function App() {
         } else {
           confirmQuery();
         }
+        break;
       }
       case 'Backspace': {
         if (query === '' && path.length > 0) {
@@ -138,7 +148,7 @@ function App() {
     <input
       autoFocus
       type='text'
-      value={query}
+      value={getFinalQuery()}
       className='form-control'
       ref={text_ref}
       onKeyDown={handleKeyDown}
@@ -149,9 +159,9 @@ function App() {
       {options.map((key, idx) => (
         <li
           key={key}
-          className={`list-group-item${selection === idx ? ' active': ''}`}
-          onMouseOver={() => setSelection(idx)}
+          className={`list-group-item list-group-item-action${selection === idx ? ' list-group-item-dark': ''}`}
           onClick={() => {
+            selection = idx;
             confirmQuery();
             text_ref.current.focus();
           }}
