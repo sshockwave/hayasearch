@@ -102,12 +102,14 @@ function App() {
       }
       case 'Tab': {
         ev.preventDefault();
-        if (options.length === 1) {
-          confirmQuery();
-        } else if (ev.shiftKey) {
-          prev_sel();
+        if (is_leaf) {
+          if (ev.shiftKey) {
+            prev_sel();
+          } else {
+            next_sel();
+          }
         } else {
-          next_sel();
+          confirmQuery();
         }
       }
       case 'Backspace': {
