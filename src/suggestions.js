@@ -58,10 +58,49 @@ export class Baidu extends Suggestion {
     }
 }
 
+export class NPMJS extends Suggestion {
+    async fetch(url, term) {
+        url = new URL(url);
+        if (!url.hostname.match(/(?:^|\.)npmjs\./)) {
+            return;
+        }
+        url.pathname = '/search/suggestions';
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            return data.map(x=>x.name);
+        } catch {
+            return;
+        }
+    }
+}
+
+export class MediaWiki extends Suggestion {
+    async fetch(url, term) {
+        url = new URL(url);
+        if (!url.hostname.match(/(?:^|\.)wikipedia\./)) {
+            return;
+        }
+        url.pathname = (new URL('./api.php', url)).pathname;
+        url.searchParams.set('action', 'opensearch');
+        url.searchParams.set('format', 'json');
+        url.searchParams.set('formatversion', 2);
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            return data[1];
+        } catch {
+            return;
+        }
+    }
+}
+
 const engine_list = [
     Google,
     Bilibili,
     Baidu,
+    NPMJS,
+    MediaWiki,
 ];
 
 export default class Aggregated extends Suggestion {
