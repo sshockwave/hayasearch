@@ -12,6 +12,7 @@ import {
   Icon,
 } from '@mui/material';
 import Aggregated from './suggestions.js';
+import 'bootstrap/scss/bootstrap.scss';
 
 function getFavicon(url) {
   try {
