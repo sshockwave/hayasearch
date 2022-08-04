@@ -154,7 +154,12 @@ function App() {
           }}
         >
           {is_leaf ? null : 
-            <img src={getFavicon(root_obj[key])} height={25} width={25}/>
+            <img
+              src={getFavicon(root_obj[key])}
+              style={{ height: '1rem', width: '1rem' }}
+              title={key}
+              className='me-3'
+            />
           }
           {key}
         </li>
