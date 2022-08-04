@@ -57,12 +57,13 @@ function App() {
       cur_root = get_path_obj(path);
     }
     setQuery(query);
-    setSelection(is_leaf ? -1: 0);
     if (typeof cur_root === 'string') { // is leaf
+      setSelection(-1);
       if (!is_leaf) { // if switched from non-leaf
         setOptions([]);
       }
     } else {
+      setSelection(0);
       setOptions(matchSorter(Array.from(Object.keys(cur_root)), query));
     }
   }
