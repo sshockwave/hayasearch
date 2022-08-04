@@ -47,7 +47,7 @@ function App() {
       .fetch(get_query_url(root_obj, query), query)
       .then((res) => {
         setOptions(res);
-        setSelection(res.length);
+        setSelection(-1);
       });
   }, [path, query]);
   function updateQuery(query, path) {
@@ -57,7 +57,7 @@ function App() {
       cur_root = get_path_obj(path);
     }
     setQuery(query);
-    setSelection(0);
+    setSelection(is_leaf ? -1: 0);
     if (typeof cur_root === 'string') { // is leaf
       if (!is_leaf) { // if switched from non-leaf
         setOptions([]);
@@ -76,19 +76,15 @@ function App() {
   function handleKeyDown(ev) {
     function prev_sel() {
       let nxt = selection - 1;
-      if (nxt < 0) {
-        if (is_leaf) {
-          nxt = options.length;
-        } else {
-          nxt = options.length - 1;
-        }
+      if ((is_leaf && nxt < -1) || (!is_leaf && nxt < 0)) {
+        nxt = options.length - 1;
       }
       setSelection(nxt);
     }
     function next_sel() {
       let nxt = selection + 1;
-      if ((is_leaf && nxt > options.length) || (!is_leaf && nxt >= options.length)) {
-        nxt = 0;
+      if (nxt === options.length) {
+        nxt = is_leaf ? -1: 0;
       }
       setSelection(nxt);
     }
