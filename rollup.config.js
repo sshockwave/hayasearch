@@ -3,13 +3,12 @@
 import resolve from '@rollup/plugin-node-resolve'
 import babel from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs'
+import image from '@rollup/plugin-image';
 import replace from '@rollup/plugin-replace'
 import { emptyDir } from 'rollup-plugin-empty-dir'
 import { chromeExtension, simpleReloader } from 'rollup-plugin-chrome-extension'
 import { terser } from "rollup-plugin-terser";
-import * as sass from 'sass';
 import postcss from "rollup-plugin-postcss";
-import path from 'path';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -33,6 +32,7 @@ export default {
       presets: ["@babel/preset-react"],
       plugins: ["@babel/plugin-transform-runtime"],
     }),
+    image(),
     simpleReloader(),
     resolve(),
     commonjs(),

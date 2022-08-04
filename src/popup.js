@@ -3,6 +3,7 @@ import React, { useEffect, useState, createRef } from 'react';
 import { matchSorter } from 'match-sorter'
 import Aggregated from './suggestions.js';
 import './scss/styles.scss';
+import edit_icon from 'bootstrap-icons/icons/pencil-square.svg';
 
 function getFavicon(url) {
   try {
@@ -142,7 +143,7 @@ function App() {
     }
   }
   const text_ref = createRef();
-  return <form className='container-fluid' style={{ minWidth: '25rem' }}>
+  return <form className='container-fluid' style={{ minWidth: '20rem' }}>
     <div className='input-group mt-3'>
       {path.map(p => <span className="input-group-text" key={p}>{p}</span>)}
     <input
@@ -155,11 +156,11 @@ function App() {
       onInput={(ev) => updateQuery(ev.target.value)}
     />
     </div>
-    <ul className='list-group mt-3'>
+    <ul className='list-group mt-3 mb-3'>
       {options.map((key, idx) => (
         <li
           key={key}
-          className={`list-group-item list-group-item-action${selection === idx ? ' list-group-item-dark': ''}`}
+          className={`list-group-item list-group-item-action d-flex align-items-center${selection === idx ? ' list-group-item-dark': ''}`}
           onClick={() => {
             selection = idx;
             confirmQuery();
@@ -175,6 +176,19 @@ function App() {
             />
           }
           {key}
+          {is_leaf ? (
+            <img
+              className='ms-auto'
+              src={edit_icon}
+              title='edit'
+              style={{ height: '1rem', width: '1rem' }}
+              onClick={(ev) => {
+                ev.stopPropagation();
+                updateQuery(key);
+                text_ref.current.focus();
+              }}
+            />
+          ) : null}
         </li>
       ))}
     </ul>
