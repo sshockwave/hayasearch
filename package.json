@@ -11,10 +11,12 @@
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
+    "node-sass": "^7.0.1",
+    "postcss": "^8.4.14",
     "rollup": "^2.77.2",
     "rollup-plugin-chrome-extension": "^3.6.10",
     "rollup-plugin-empty-dir": "^1.0.5",
-    "rollup-plugin-scss": "^3.0.0",
+    "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-terser": "^7.0.2",
     "sass": "^1.54.2"
   },

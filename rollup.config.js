@@ -7,7 +7,11 @@ import replace from '@rollup/plugin-replace'
 import { emptyDir } from 'rollup-plugin-empty-dir'
 import { chromeExtension, simpleReloader } from 'rollup-plugin-chrome-extension'
 import { terser } from "rollup-plugin-terser";
-import scss from 'rollup-plugin-scss'
+import * as sass from 'sass';
+import postcss from "rollup-plugin-postcss";
+import path from 'path';
+
+const production = !process.env.ROLLUP_WATCH;
 
 export default {
   input: 'src/manifest.json',
@@ -22,7 +26,7 @@ export default {
       preventAssignment: true,
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     }),
-    scss(),
+    postcss({ minimize: production }),
     babel({
       babelHelpers: 'runtime',
       ignore: ['node_modules'],
@@ -33,6 +37,6 @@ export default {
     resolve(),
     commonjs(),
     emptyDir(),
-    terser(),
+    production && terser(),
   ],
 }
