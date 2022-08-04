@@ -2,14 +2,12 @@ import { createRoot } from 'react-dom/client';
 import React, { useEffect, useState, createRef } from 'react';
 import { matchSorter } from 'match-sorter'
 import {
-  Box,
   TextField,
   List,
   ListItem,
   ListItemText,
   ListItemIcon,
   ListItemButton,
-  Icon,
 } from '@mui/material';
 import Aggregated from './suggestions.js';
 import './scss/styles.scss';
@@ -143,40 +141,38 @@ function App() {
     }
   }
   const text_ref = createRef();
-  return <Box component='form' sx={{ minWidth: '20rem' }} >
-    <TextField
-      label={path.join('»')}
+  return <form className='container-fluid' style={{ minWidth: '25rem' }}>
+    <div className='input-group mt-3'>
+      {path.map(p => <span className="input-group-text" key={p}>{p}</span>)}
+    <input
       autoFocus
-      fullWidth
-      color={is_leaf ? 'success': 'warning'}
+      type='text'
       value={query}
-      size="small"
-      inputRef={text_ref}
+      className='form-control'
+      ref={text_ref}
       onKeyDown={handleKeyDown}
       onInput={(ev) => updateQuery(ev.target.value)}
     />
-    <List dense>
+    </div>
+    <ul className='list-group mt-3'>
       {options.map((key, idx) => (
-        <ListItem key={key} disablePadding>
-          <ListItemButton
-            selected={selection === idx}
-            onMouseOver={() => setSelection(idx)}
-            onClick={() => {
-              confirmQuery();
-              text_ref.current.focus();
-            }}
-          >
-            {is_leaf ? null : <ListItemIcon>
-              <Icon>
-                <img src={getFavicon(root_obj[key])} height={25} width={25}/>
-              </Icon>
-            </ListItemIcon>}
-            <ListItemText primary={key}/>
-          </ListItemButton>
-        </ListItem>
+        <li
+          key={key}
+          className={`list-group-item${selection === idx ? ' active': ''}`}
+          onMouseOver={() => setSelection(idx)}
+          onClick={() => {
+            confirmQuery();
+            text_ref.current.focus();
+          }}
+        >
+          {is_leaf ? null : 
+            <img src={getFavicon(root_obj[key])} height={25} width={25}/>
+          }
+          {key}
+        </li>
       ))}
-    </List>
-  </Box>;
+    </ul>
+  </form>;
 }
 
 function start_app() {
