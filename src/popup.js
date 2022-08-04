@@ -6,6 +6,7 @@ import './scss/styles.scss';
 import edit_icon from 'bootstrap-icons/icons/pencil-square.svg';
 
 let config, icon_map;
+let last_update_timestamp = 0, current_timestamp = 0;
 function get_path_obj(path) {
   let ans = config || {};
   for (const k of path) {
@@ -40,9 +41,14 @@ function App() {
       return;
     }
     const api = new Aggregated;
+    let this_time = current_timestamp++;
     api
       .fetch(get_query_url(root_obj, query), query)
       .then((res) => {
+        if (this_time < last_update_timestamp) {
+          return;
+        }
+        last_update_timestamp = this_time;
         setOptions(res);
         setSelection(-1);
       });
