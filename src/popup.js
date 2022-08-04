@@ -5,17 +5,7 @@ import Aggregated from './suggestions.js';
 import './scss/styles.scss';
 import edit_icon from 'bootstrap-icons/icons/pencil-square.svg';
 
-function getFavicon(url) {
-  try {
-    url = new URL(url);
-  } catch {
-    return null;
-  }
-  url.pathname = 'favicon.ico';
-  return url.toString();
-}
-
-let config;
+let config, icon_map;
 function get_path_obj(path) {
   let ans = config || {};
   for (const k of path) {
@@ -167,14 +157,14 @@ function App() {
             text_ref.current.focus();
           }}
         >
-          {is_leaf ? null : 
+          {is_leaf ? null : typeof root_obj[key] === 'string' ? (
             <img
-              src={getFavicon(root_obj[key])}
+              src={icon_map[root_obj[key]]}
               style={{ height: '1rem', width: '1rem' }}
               title={key}
               className='me-3'
             />
-          }
+          ) : null}
           {key}
           {is_leaf ? (
             <img
@@ -199,7 +189,8 @@ function start_app() {
   createRoot(document.getElementById('root')).render(<App/>);
 }
 
-chrome.storage.sync.get(['search_engines'], ({ search_engines }) => {
+chrome.storage.sync.get(['search_engines', 'icon_map'], ({ search_engines, icon_map: _icon_map }) => {
   config = search_engines || {};
+  icon_map = _icon_map;
   start_app();
 });
