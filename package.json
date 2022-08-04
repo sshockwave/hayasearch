@@ -1,5 +1,8 @@
 {
+  "name": "hayasearch",
   "type": "module",
+  "description": "Switch between multiple search engines",
+  "version": "1.0",
   "scripts": {
     "build": "rollup -c",
     "start": "rollup -c -w"
